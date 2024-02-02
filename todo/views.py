@@ -1,14 +1,25 @@
 from rest_framework.decorators import api_view
 from rest_framework.decorators import APIView
-from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework import generics, mixins
+from rest_framework import generics, viewsets, mixins
 from rest_framework.request import Request
 from rest_framework import status
-
-from .serializers import TodoSerializer
+from django.contrib.auth import get_user_model
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from .serializers import TodoSerializer, UserTodoSerializer
 from .models import Todo
+
+
 # Create your views here:
+
+
+User = get_user_model()
+
+
+class UserGenericView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserTodoSerializer
 
 
 class TodoListViewSet(viewsets.ModelViewSet):
@@ -18,43 +29,45 @@ class TodoListViewSet(viewsets.ModelViewSet):
 
 # Generic Base Views Start
 
-# class TodoGenericListView(generics.ListCreateAPIView):
-#     queryset = Todo.objects.all()
-#     serializer_class = TodoSerializer
-#
-#
-# class TodoGenericDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     queryset = Todo.objects.all()
-#     serializer_class = TodoSerializer
+class TodoGenericListView(generics.ListCreateAPIView):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
+    # authentication_classes = [BasicAuthentication]
+    # permission_classes = [IsAuthenticated]
+
+
+class TodoGenericDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
 
 
 # Mixin Base Views Start:
 
-# class TodoListMixins(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
-#     queryset = Todo.objects.all()
-#     serializer_class = TodoSerializer
-#
-#     def get(self, request: Request):
-#         return self.list(request)
-#
-#     def post(self, request: Request):
-#         return self.create(request)
-#
-#
-# class TodoDetailMixins(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-#                        generics.GenericAPIView):
-#
-#     queryset = Todo.objects.all()
-#     serializer_class = TodoSerializer
-#
-#     def get(self, request: Request, pk: int):
-#         return self.retrieve(request, pk)
-#
-#     def put(self, request: Request, pk: int):
-#         return self.update(request, pk)
-#
-#     def delete(self, request: Request, pk: int):
-#         return self.destroy(request, pk)
+class TodoListMixins(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
+
+    def get(self, request: Request):
+        return self.list(request)
+
+    def post(self, request: Request):
+        return self.create(request)
+
+
+class TodoDetailMixins(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin,
+                       generics.GenericAPIView):
+
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
+
+    def get(self, request: Request, pk: int):
+        return self.retrieve(request, pk)
+
+    def put(self, request: Request, pk: int):
+        return self.update(request, pk)
+
+    def delete(self, request: Request, pk: int):
+        return self.destroy(request, pk)
 
 
 # Class Base Views Start:
