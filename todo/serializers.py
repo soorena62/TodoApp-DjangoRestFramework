@@ -12,6 +12,11 @@ class TodoSerializer(serializers.ModelSerializer):
         model = Todo
         fields = '__all__'
 
+    def priority_validate(self, priority):
+        if priority > 20:
+            raise serializers.ValidationError("Priority must be less than or equal to 20")
+        return priority
+
 
 class UserTodoSerializer(serializers.ModelSerializer):
     todos = TodoSerializer(many=True, read_only=True)
